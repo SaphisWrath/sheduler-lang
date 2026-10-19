@@ -58,7 +58,6 @@ class ShedulerGeneratorTest {
 	@TempDir
 	Path tempDir;
 
-	@Disabled("TODO Ex 3: remove this line once done")
 	@Test
 	void timedTasks() throws Exception {
 		String system = generateAndCompile("pool p {\n" + TIMED_TASKS + "}");
