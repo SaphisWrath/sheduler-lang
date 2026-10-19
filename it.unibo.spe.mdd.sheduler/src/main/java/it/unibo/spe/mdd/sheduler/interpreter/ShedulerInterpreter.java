@@ -74,12 +74,29 @@ public class ShedulerInterpreter {
         // executor threads are non-daemon: the JVM stays alive until killed (Ctrl+C)
     }
 
-    // TODO Ex 4.1: `in <relative time>` -> ShedulerTask.in(...), hint: TimeUtils.toDuration
-    // TODO Ex 4.2: `at <absolute time>` -> ShedulerTask.at(...), hint: TimeUtils.toLocalDateTime
-    // TODO Ex 4.3: `repeat every <relative time>` -> setPeriod(...)
-    // TODO Ex 4.4: name and entry point may be null: ShedulerTask already handles that
+    // Ex 4.1: `in <relative time>` -> ShedulerTask.in(...), hint: TimeUtils.toDuration
+    // Ex 4.2: `at <absolute time>` -> ShedulerTask.at(...), hint: TimeUtils.toLocalDateTime
+    // Ex 4.3: `repeat every <relative time>` -> setPeriod(...)
+    // Ex 4.4: name and entry point may be null: ShedulerTask already handles that
     // TODO Ex 5.16: `before`/`after` -> ShedulerTask.dependent(...)
     static ShedulerTask toShedulerTask(Task task) {
-        throw new UnsupportedOperationException("TODO Ex 4.1: convert a Task (model) into a ShedulerTask (runtime)");
+        ShedulerTask shedTask;
+        if (task.getRelative() != null) {
+            shedTask = ShedulerTask.in(
+                task.getName(),
+                task.getCommand(),
+                task.getEntrypoint(),
+                TimeUtils.toDuration(task.getRelative())
+            );
+        } else {
+            shedTask = ShedulerTask.at(
+                task.getName(),
+                task.getCommand(),
+                task.getEntrypoint(),
+                TimeUtils.toLocalDateTime(task.getAbsolute())
+            );
+        }
+        if (task.getPeriod() != null) shedTask.setPeriod(TimeUtils.toDuration(task.getPeriod()));
+        return shedTask;
     }
 }

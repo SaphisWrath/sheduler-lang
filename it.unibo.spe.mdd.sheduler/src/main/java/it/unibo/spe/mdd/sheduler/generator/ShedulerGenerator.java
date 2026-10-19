@@ -103,19 +103,34 @@ public class ShedulerGenerator extends AbstractShedulerGenerator {
 	// Ex 3.10: body of a pool method: declare one local variable per task (named by position: task0, task1, ...,
 	//               as DSL names are optional, and may clash with Java keywords), via generateTask
 	// Ex 3.11: then, schedule each task via `runtime.schedule(taskN);`
-	// TODO Ex 5.10: dependencies: in between declarations and scheduling, attach each dependent task to its anchor:
-	//               `x after y` becomes `taskY.addSuccessor(taskX);`, `x before y` becomes `taskY.addPredecessor(taskX);`
-	//               (hint: anchors are in the same pool, so List.indexOf gives you their position)
-	// TODO Ex 5.11: dependent tasks must NOT be scheduled: only their anchors are
+	// Ex 5.10: dependencies: in between declarations and scheduling, attach each dependent task to its anchor:
+	//   `x after y` becomes `taskY.addSuccessor(taskX);`, `x before y` becomes `taskY.addPredecessor(taskX);`
+	//   (hint: anchors are in the same pool, so List.indexOf gives you their position)
+	// Ex 5.11: dependent tasks must NOT be scheduled: only their anchors are
 	private String generateTaskPool(TaskPool pool) {
 		StringBuilder sb = new StringBuilder();
 		List<Task> tasks = pool.getTasks();
 		for (int i = 0; i < tasks.size(); i++) {
 			sb.append(generateTask(i, tasks.get(i))).append("\n");
 		}
+		for (Task task : tasks) {
+			if (task.getBefore() != null) sb
+				.append("task")
+				.append(tasks.indexOf(task.getBefore()))
+				.append(".addPredecessor(task")
+				.append(tasks.indexOf(task))
+				.append(");");
+			else if (task.getAfter() != null) sb
+				.append("task")
+				.append(tasks.indexOf(task.getAfter()))
+				.append(".addSuccessor(task")
+				.append(tasks.indexOf(task))
+				.append(");");
+		}
 		for (int i = 0; i < tasks.size(); i++) {
 			Task task = tasks.get(i);
-			sb.append("runtime.schedule(task").append(i).append(");\n");
+			if (task.getBefore() == null && task.getAfter() == null)
+				sb.append("runtime.schedule(task").append(i).append(");\n");
 		}
 		return sb.toString();
 	}
@@ -126,7 +141,7 @@ public class ShedulerGenerator extends AbstractShedulerGenerator {
 	//               (hint: TimeUtils.toLocalDateTime(...).toString())
 	// Ex 3.14: `repeat every <relative time>` adds `taskN.setPeriod(Duration.parse("<ISO-8601>"));`
 	// Ex 3.15: name and entry point are optional in the DSL: pass a Java `null` literal when they are missing
-	// TODO Ex 5.12: tasks with `before`/`after` become `... ShedulerTask.dependent(<name>, <command>, <entrypoint>);`
+	// Ex 5.12: tasks with `before`/`after` become `... ShedulerTask.dependent(<name>, <command>, <entrypoint>);`
 	private String generateTask(int i, Task task) {
 		String args = javaString(task.getName()) + ", " + javaString(task.getCommand()) + ", " + javaString(task.getEntrypoint());
 		StringBuilder sb = new StringBuilder();
@@ -141,6 +156,10 @@ public class ShedulerGenerator extends AbstractShedulerGenerator {
 				.append(args)
 				.append(", LocalDateTime.parse(").append(javaString(TimeUtils.toLocalDateTime(task.getAbsolute()).toString()))
 				.append("));");
+		} else {
+			sb.append("ShedulerTask.dependent(")
+				.append(args)
+				.append(");");
 		}
 
 		if (task.getPeriod() != null) {

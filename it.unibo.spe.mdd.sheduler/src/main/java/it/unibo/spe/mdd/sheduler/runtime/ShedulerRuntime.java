@@ -19,12 +19,15 @@ public class ShedulerRuntime {
     }
 
     public void schedule(ShedulerTask task) {
-        // TODO Ex 5.9: dependent tasks have no delay of their own, as they are run by their anchor task:
+        // Ex 5.9: dependent tasks have no delay of their own, as they are run by their anchor task:
         //              throw an IllegalArgumentException if someone tries to schedule them
         // executors work with a numeric amount + a time unit, so durations are converted into milliseconds
         // (this is why the validator warns about durations that overflow toMillis(), and forbids periods < 1 ms)
         if (task.isPeriodic()) {
             delegate.scheduleAtFixedRate(task.asRunnable(), task.getDelay().toMillis(), task.getPeriod().toMillis(), TimeUnit.MILLISECONDS);
+        } if (task.isPeriodic()) {
+            throw new IllegalArgumentException("Task " + task.getName()
+                + " is dependent: it is triggered by its anchor task");
         } else {
             delegate.schedule(task.asRunnable(), task.getDelay().toMillis(), TimeUnit.MILLISECONDS);
         }
