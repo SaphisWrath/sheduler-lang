@@ -14,6 +14,7 @@ import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -180,11 +181,25 @@ public class ShedulerValidator extends AbstractShedulerValidator {
 
     @Check
     public void ensureNoDependencyCycles(Task task) {
-        // TODO Ex 5.17: `a after b` + `b after a` means neither task ever runs
-        // TODO Ex 5.17a: each task has at most one anchor (its getBefore() or getAfter())
-        // TODO Ex 5.17b: starting from task, follow anchors until reaching a timed task (anchor == null)...
-        // TODO Ex 5.17c: ...or until you meet a task you already visited (a cycle!)
-        // TODO Ex 5.17d: report an error on TASK__BEFORE or TASK__AFTER (message containing "Cyclic"),
+        // Ex 5.17: `a after b` + `b after a` means neither task ever runs
+        // Ex 5.17a: each task has at most one anchor (its getBefore() or getAfter())
+        // Ex 5.17b: starting from task, follow anchors until reaching a timed task (anchor == null)...
+        // Ex 5.17c: ...or until you meet a task you already visited (a cycle!)
+        //  Ex 5.17d: report an error on TASK__BEFORE or TASK__AFTER (message containing "Cyclic"),
         //                           but only if `task` itself is part of the cycle
+        Set<Task> visited = new HashSet<>();
+        for (Task current = task; current != null; current = anchorOf(current)) {
+            if (!visited.add(current)) {
+                if (current == task) {
+                    error("Cyclic dependency: task never reaches a timed task.", task,
+                        task.getBefore() != null ? ShedulerPackage.Literals.TASK__BEFORE : ShedulerPackage.Literals.TASK__AFTER);
+                }
+                return;
+            }
+        }
+    }
+
+    private Task anchorOf(Task task) {
+        return task.getBefore() != null ? task.getBefore() : task.getAfter();
     }
 }

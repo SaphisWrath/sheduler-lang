@@ -85,7 +85,6 @@ class ShedulerValidatorTest {
         helper.assertError(task("in 1 s repeat every 500 ns"), TASK, null, "at least 1 millisecond");
     }
 
-    @Disabled("TODO Ex 5.17: remove this line once done")
     @Test
     void cyclicDependency() throws Exception {
         var model = parseHelper.parse("pool { schedule task a { command \"c\" after b } schedule task b { command \"c\" before a } }");
