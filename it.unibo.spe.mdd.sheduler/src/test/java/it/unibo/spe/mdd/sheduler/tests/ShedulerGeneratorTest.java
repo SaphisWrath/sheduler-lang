@@ -67,7 +67,6 @@ class ShedulerGeneratorTest {
 		assertTrue(system.contains("runtime.schedule(task1)"), system);
 	}
 
-	@Disabled("TODO Ex 5.10-5.12: remove this line once done")
 	@Test
 	void dependentTasks() throws Exception {
 		String system = generateAndCompile("pool p {\n" + TIMED_TASKS + DEPENDENT_TASKS + "}");

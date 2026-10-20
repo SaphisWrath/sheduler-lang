@@ -29,8 +29,8 @@ public class ShedulerTask {
     private final String entrypoint;
     private final Duration delay;
     private Duration period;
-    private List<ShedulerTask> predecessors;
-    private List<ShedulerTask> successors;
+    private final List<ShedulerTask> predecessors = new ArrayList<>();
+    private final List<ShedulerTask> successors = new ArrayList<>();
     // Ex 5.1: a task must know which tasks to run right before it (predecessors) and right after it (successors)
 
     // private constructor: tasks are created via the static factory methods below, whose names mirror the DSL keywords

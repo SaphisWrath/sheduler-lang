@@ -25,7 +25,7 @@ public class ShedulerRuntime {
         // (this is why the validator warns about durations that overflow toMillis(), and forbids periods < 1 ms)
         if (task.isPeriodic()) {
             delegate.scheduleAtFixedRate(task.asRunnable(), task.getDelay().toMillis(), task.getPeriod().toMillis(), TimeUnit.MILLISECONDS);
-        } if (task.isPeriodic()) {
+        } if (task.isDependent()) {
             throw new IllegalArgumentException("Task " + task.getName()
                 + " is dependent: it is triggered by its anchor task");
         } else {

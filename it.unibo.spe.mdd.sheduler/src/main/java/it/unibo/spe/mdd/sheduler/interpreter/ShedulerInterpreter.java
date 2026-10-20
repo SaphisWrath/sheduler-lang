@@ -19,7 +19,9 @@ import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 import org.eclipse.xtext.validation.Issue;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 /**
@@ -62,13 +64,24 @@ public class ShedulerInterpreter {
         TaskPoolSet taskPools = (TaskPoolSet) resource.getContents().get(0);
         ShedulerRuntime runtime = new ShedulerRuntime(Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()));
         for (TaskPool pool : taskPools.getPools()) {
-            // TODO Ex 5.13: dependent tasks need their anchor's ShedulerTask: first convert all tasks of the pool
+            // Ex 5.13: dependent tasks need their anchor's ShedulerTask: first convert all tasks of the pool
             //               (hint: a LinkedHashMap<Task, ShedulerTask> keeps the order, and EObjects use identity equality)
-            // TODO Ex 5.14: then attach each dependent task to its anchor (`x after y` -> y.addSuccessor(x),
-            //               `x before y` -> y.addPredecessor(x))
-            // TODO Ex 5.15: finally, schedule non-dependent tasks only
+            Map<Task, ShedulerTask> tasks = new LinkedHashMap<>();
             for (Task task : pool.getTasks()) {
-                runtime.schedule(toShedulerTask(task));
+                tasks.put(task, toShedulerTask(task));
+            }
+            // Ex 5.14: then attach each dependent task to its anchor (`x after y` -> y.addSuccessor(x),
+            //               `x before y` -> y.addPredecessor(x))
+            for (Map.Entry<Task, ShedulerTask> entry : tasks.entrySet()) {
+                Task task = entry.getKey();
+                if (task.getAfter() != null) {
+                    tasks.get(task.getAfter()).addSuccessor(entry.getValue());
+                } else if (task.getBefore() != null) {
+                    tasks.get(task.getBefore()).addPredecessor(entry.getValue());
+                }
+            }
+            for (ShedulerTask task : tasks.values()) {
+                if (!task.isDependent()) runtime.schedule(task);
             }
         }
         // executor threads are non-daemon: the JVM stays alive until killed (Ctrl+C)
@@ -78,7 +91,7 @@ public class ShedulerInterpreter {
     // Ex 4.2: `at <absolute time>` -> ShedulerTask.at(...), hint: TimeUtils.toLocalDateTime
     // Ex 4.3: `repeat every <relative time>` -> setPeriod(...)
     // Ex 4.4: name and entry point may be null: ShedulerTask already handles that
-    // TODO Ex 5.16: `before`/`after` -> ShedulerTask.dependent(...)
+    // Ex 5.16: `before`/`after` -> ShedulerTask.dependent(...)
     static ShedulerTask toShedulerTask(Task task) {
         ShedulerTask shedTask;
         if (task.getRelative() != null) {
@@ -88,12 +101,18 @@ public class ShedulerInterpreter {
                 task.getEntrypoint(),
                 TimeUtils.toDuration(task.getRelative())
             );
-        } else {
+        } else if (task.getAfter() != null) {
             shedTask = ShedulerTask.at(
                 task.getName(),
                 task.getCommand(),
                 task.getEntrypoint(),
                 TimeUtils.toLocalDateTime(task.getAbsolute())
+            );
+        } else {
+            shedTask = ShedulerTask.dependent(
+                task.getName(),
+                task.getCommand(),
+                task.getEntrypoint()
             );
         }
         if (task.getPeriod() != null) shedTask.setPeriod(TimeUtils.toDuration(task.getPeriod()));

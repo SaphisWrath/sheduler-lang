@@ -16,6 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class ShedulerRuntimeTest {
     private static final String SH = "/bin/sh -c";
@@ -23,7 +24,6 @@ class ShedulerRuntimeTest {
     @TempDir
     Path tempDir;
 
-    @Disabled("TODO Ex 5.2-5.3 and 5.9: remove this line once done")
     @Test
     void scheduleRejectsDependentTasks() {
         ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
@@ -34,7 +34,6 @@ class ShedulerRuntimeTest {
         }
     }
 
-    @Disabled("TODO Ex 5.1-5.8: remove this line once done")
     @Test
     void dependenciesRunInOrder() throws Exception {
         assumeFalse(System.getProperty("os.name").toLowerCase().contains("win"));
