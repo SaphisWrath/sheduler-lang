@@ -43,7 +43,7 @@ in [Eclipse for DSL developers](https://eclipse.dev/Xtext/download.html) (full X
 |---------|--------------|
 | `./gradlew build` | Regenerates the Xtext infrastructure from `Sheduler.xtext`, compiles, runs all tests |
 | `./gradlew jettyRun` | Starts the web playground on <http://localhost:8080> |
-| `./gradlew :it.unibo.spe.mdd.sheduler:run --args=/abs/path/file.shed` | Generates Java code next to `file.shed` |
+| `./gradlew :it.unibo.spe.mdd.sheduler:run --args=C:\Users\giuli\Desktop\Uni_PARTE_2\Software Process Engineering\sheduler-lang\schedule.shed` | Generates Java code next to `file.shed` |
 | `./gradlew :it.unibo.spe.mdd.sheduler:runInterpreter --args=/abs/path/file.shed` | Runs `file.shed` directly (stop with Ctrl+C) |
 | `./gradlew shadowJar` | Packs the command-line compiler (`*-compiler.jar`) and the LSP server (`*-ls.jar`) |
 
